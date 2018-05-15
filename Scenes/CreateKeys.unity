@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6571fd61723ee404c907bde0ee11d273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SkinUI: {fileID: 11400000, guid: 4ab8c46e8408b4142ada747902f03a4e, type: 2}
+  SkinUI: {fileID: 11400000, guid: 55a974c574e48c44eb6a0078229c61c3, type: 2}
 --- !u!1 &707588183
 GameObject:
   m_ObjectHideFlags: 0

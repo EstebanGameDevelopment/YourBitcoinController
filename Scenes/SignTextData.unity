@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 210727209}
   - component: {fileID: 210727210}
   m_Layer: 0
-  m_Name: BasicManager
+  m_Name: SignTextData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 210727208}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6e9de9688f75e549a95292cebc3e0bc, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e2e47a1a30c9734ea8664f77742b4f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SkinUI: {fileID: 11400000, guid: 55a974c574e48c44eb6a0078229c61c3, type: 2}

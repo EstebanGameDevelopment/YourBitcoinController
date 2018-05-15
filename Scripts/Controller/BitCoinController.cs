@@ -8,6 +8,7 @@ using System.Text;
 using QBitNinja.Client.Models;
 using UnityEngine.Networking;
 using System.Security.Cryptography;
+using UnityEngine.UI;
 
 namespace YourBitcoinController
 {
@@ -1122,6 +1123,36 @@ namespace YourBitcoinController
 				_transactionCustomer.Inputs[i].ScriptSig = _customerPrivateKey.ScriptPubKey;
 			}
 			_transactionCustomer.Sign(_customerPrivateKey, false);
+		}
+
+		// -------------------------------------------
+		/* 
+		* SignTextData
+		*/
+		public string SignTextData(string _data, string _currentPrivateKey)
+		{
+			BitcoinSecret privateKey = new BitcoinSecret(_currentPrivateKey, m_network);
+			return privateKey.PrivateKey.SignMessage(_data);
+		}
+
+		// -------------------------------------------
+		/* 
+		* SignBinaryData
+		*/
+		public string SignBinaryData(byte[] _data, string _currentPrivateKey)
+		{
+			BitcoinSecret privateKey = new BitcoinSecret(_currentPrivateKey, m_network);
+			return privateKey.PrivateKey.SignMessage(_data);
+		}
+
+		// -------------------------------------------
+		/* 
+		* VerifySignedData
+		*/
+		public bool VerifySignedData(string _dataOriginal, string _dataSigned, string _publicKey)
+		{
+			BitcoinPubKeyAddress address = new BitcoinPubKeyAddress(_publicKey);			
+			return address.VerifyMessage(_dataOriginal, _dataSigned);			
 		}
 
 		// -------------------------------------------

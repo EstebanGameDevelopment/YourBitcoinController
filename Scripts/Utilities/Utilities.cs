@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace YourBitcoinController
 {
@@ -699,6 +700,36 @@ namespace YourBitcoinController
 			{
 				return _value;
 			}
+		}
+
+
+		// -------------------------------------------
+		/* 
+		 * GetBytesPNG
+		 */
+		public static byte[] GetBytesPNG(Sprite _image)
+		{
+			return _image.texture.EncodeToPNG();
+		}
+
+		// -------------------------------------------
+		/* 
+		 * GetBytesPNG
+		 */
+		public static byte[] GetBytesPNG(Texture2D _image)
+		{
+			return _image.EncodeToPNG();
+		}
+
+		// -------------------------------------------
+		/* 
+		* ComputeHashCode
+		*/
+		public static string ComputeHashCode(byte[] _imgBytes)
+		{
+			SHA256Managed shaEncryptor = new SHA256Managed();
+			byte[] hash = shaEncryptor.ComputeHash(_imgBytes);
+			return Convert.ToBase64String(hash);
 		}
 	}
 }

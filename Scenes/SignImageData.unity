@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 210727209}
   - component: {fileID: 210727210}
   m_Layer: 0
-  m_Name: BasicManager
+  m_Name: SignImageData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,10 +150,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 210727208}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6e9de9688f75e549a95292cebc3e0bc, type: 3}
+  m_Script: {fileID: 11500000, guid: 159631b40fde45b46afc0f75ea441687, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SkinUI: {fileID: 11400000, guid: 55a974c574e48c44eb6a0078229c61c3, type: 2}
+  MyImages:
+  - {fileID: 2800000, guid: dd776f7a6c6fc074e9e81dab96a24e45, type: 3}
+  - {fileID: 2800000, guid: e4c26e916feb7ac48a761d190ec1314b, type: 3}
+  - {fileID: 2800000, guid: 063514963907a9b4f81f50dc829e7de2, type: 3}
+  - {fileID: 2800000, guid: 1385d1797e009194b9f5e1a7a1efdc8d, type: 3}
+  OriginImageToSign: 0
+  TargetImageToTest: 0
 --- !u!1 &707588183
 GameObject:
   m_ObjectHideFlags: 0
