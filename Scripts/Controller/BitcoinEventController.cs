@@ -7,7 +7,7 @@ using System.IO;
 
 namespace YourBitcoinController
 {
-	public delegate void BasicEventHandler(string _nameEvent, params object[] _list);
+	public delegate void BitcoinEventHandler(string _nameEvent, params object[] _list);
 
 	/******************************************
 	 * 
@@ -17,38 +17,31 @@ namespace YourBitcoinController
 	 * 
 	 * @author Esteban Gallardo
 	 */
-	public class BasicEventController : MonoBehaviour
+	public class BitcoinEventController : MonoBehaviour
 	{
-		// ----------------------------------------------
-		// EVENTS
-		// ----------------------------------------------	
-		public const string EVENT_BASICEVENT_DELAYED_CALL			= "EVENT_BASICEVENT_DELAYED_CALL";
-		public const string EVENT_BASICEVENT_TOTAL_UNITS_AVAILABLE	= "EVENT_BASICEVENT_TOTAL_UNITS_AVAILABLE";
-		public const string EVENT_BASICEVENT_TOTAL_TIME				= "EVENT_BASICEVENT_TOTAL_TIME";
-
-		public event BasicEventHandler BasicEvent;
+		public event BitcoinEventHandler BitcoinEvent;
 
 		// ----------------------------------------------
 		// SINGLETON
 		// ----------------------------------------------	
-		private static BasicEventController _instance;
+		private static BitcoinEventController _instance;
 
-		public static BasicEventController Instance
+		public static BitcoinEventController Instance
 		{
 			get
 			{
 				if (!_instance)
 				{
-					_instance = GameObject.FindObjectOfType(typeof(BasicEventController)) as BasicEventController;
+					_instance = GameObject.FindObjectOfType(typeof(BitcoinEventController)) as BitcoinEventController;
 					if (!_instance)
 					{
 						GameObject container = new GameObject();
-						string finalSingletonName = "^BasicController^";
+						string finalSingletonName = "^BitcoinEventController^";
 #if !ENABLE_MY_OFUSCATION || UNITY_EDITOR
 						finalSingletonName = finalSingletonName.Replace("^", "");
 #endif
 						container.name = finalSingletonName;
-						_instance = container.AddComponent(typeof(BasicEventController)) as BasicEventController;
+						_instance = container.AddComponent(typeof(BitcoinEventController)) as BitcoinEventController;
 					}
 				}
 				return _instance;
@@ -64,7 +57,7 @@ namespace YourBitcoinController
 		/* 
 		 * Constructor
 		 */
-		private BasicEventController()
+		private BitcoinEventController()
 		{
 		}
 
@@ -74,7 +67,7 @@ namespace YourBitcoinController
 		 */
 		public void Destroy()
 		{
-			DestroyObject(_instance.gameObject);
+			Destroy(_instance.gameObject);
 			_instance = null;
 		}
 
@@ -82,9 +75,9 @@ namespace YourBitcoinController
 		/* 
 		 * Will dispatch an event
 		 */
-		public void DispatchBasicEvent(string _nameEvent, params object[] _list)
+		public void DispatchBitcoinEvent(string _nameEvent, params object[] _list)
 		{
-			if (BasicEvent != null) BasicEvent(_nameEvent, _list);
+			if (BitcoinEvent != null) BitcoinEvent(_nameEvent, _list);
 		}
 
 		// -------------------------------------------
@@ -118,7 +111,7 @@ namespace YourBitcoinController
 				eventData.Time -= Time.deltaTime;
 				if (eventData.Time <= 0)
 				{
-					BasicEvent(eventData.NameEvent, eventData.List);
+					BitcoinEvent(eventData.NameEvent, eventData.List);
 					eventData.Destroy();
 					m_listEvents.RemoveAt(i);
 					break;

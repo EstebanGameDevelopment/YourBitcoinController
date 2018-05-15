@@ -42,7 +42,7 @@ namespace YourBitcoinController
 		public override void Response(string _response)
 		{
 			ResponseCode(_response);
-			BasicEventController.Instance.DispatchBasicEvent(BitCoinController.EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE, m_jsonResponse);
+			BitcoinEventController.Instance.DispatchBitcoinEvent(BitCoinController.EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE, m_jsonResponse);
 		}
 	}
 }

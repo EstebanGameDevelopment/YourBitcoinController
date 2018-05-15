@@ -30,9 +30,9 @@ namespace YourBitcoinController
 		// ----------------------------------------------
 		// COMM EVENTS
 		// ----------------------------------------------	
-		public const string EVENT_COMM_BITCOIN_EXCHANGE_INFO = "EVENT_0082";
-		public const string EVENT_COMM_BITCOIN_JSON_EXCHANGE_TABLE = "EVENT_0083";
-		public const string EVENT_COMM_BITCOIN_JSON_TRANSACTION_FEE = "EVENT_TF84";
+		public const string EVENT_COMM_BITCOIN_EXCHANGE_INFO		= "EVENT_COMM_BITCOIN_EXCHANGE_INFO";
+		public const string EVENT_COMM_BITCOIN_JSON_EXCHANGE_TABLE	= "EVENT_COMM_BITCOIN_JSON_EXCHANGE_TABLE";
+		public const string EVENT_COMM_BITCOIN_JSON_TRANSACTION_FEE = "EVENT_COMM_BITCOIN_JSON_TRANSACTION_FEE";
 
 		public const int STATE_IDLE = 0;
 		public const int STATE_COMMUNICATION = 1;

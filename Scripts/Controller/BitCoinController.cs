@@ -243,7 +243,7 @@ namespace YourBitcoinController
 				{
 					m_currentPublicKey = GetPublicKey(m_currentPrivateKey);
 					PlayerPrefs.SetString(CodeNetwork + BITCOIN_PRIVATE_KEY_SELECTED, RJEncryptor.EncryptStringWithKey(m_currentPrivateKey, ENCRYPTION_KEY));
-					BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY);
+					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY);
 				}
 			}
 		}
@@ -260,7 +260,7 @@ namespace YourBitcoinController
 				{
 					m_currentPrivateKey = "";
 				}
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY);
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY);
 			}
 		}
 		public string CurrentCurrency
@@ -306,7 +306,7 @@ namespace YourBitcoinController
 			{
 				m_network = NBitcoin.Network.TestNet;
 			}			
-			BasicEventController.Instance.BasicEvent += new BasicEventHandler(OnBasicEvent);
+			BitcoinEventController.Instance.BitcoinEvent += new BitcoinEventHandler(OnBasicEvent);
 
 			m_currentCurrency = PlayerPrefs.GetString(CodeNetwork + BITCOIN_DEFAULT_CURRENCY, CODE_DOLLAR);
 
@@ -319,7 +319,7 @@ namespace YourBitcoinController
 		 */
 		public void Destroy()
 		{
-			BasicEventController.Instance.BasicEvent -= OnBasicEvent;
+			BitcoinEventController.Instance.BitcoinEvent -= OnBasicEvent;
 			Destroy(_instance.gameObject);
 			_instance = null;
 		}
@@ -539,7 +539,7 @@ namespace YourBitcoinController
 			{
 				decimal newBalance = GetBalance(privateKey.Key);
 				newDataPrivateKeys.Add(privateKey.Key, newBalance);
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_BALANCE_UPDATED, privateKey.Key, newBalance);
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_BALANCE_UPDATED, privateKey.Key, newBalance);
 				m_publicKeys.Add(privateKey.Key, GetPublicKey(privateKey.Key));
 			}
 			m_privateKeys.Clear();
@@ -696,7 +696,16 @@ namespace YourBitcoinController
 		{
 			try
 			{
-				return ValidateBitcoinAddress(_publicKey);				
+				if (m_isMainNetwork)
+				{
+					return ValidateBitcoinAddress(_publicKey);
+				}
+				else
+				{
+					BitcoinPubKeyAddress btkAddress = new BitcoinPubKeyAddress(_publicKey, BitCoinController.Instance.Network);
+					string publicKeyVerification = btkAddress.ScriptPubKey.GetDestinationAddress(BitCoinController.Instance.Network).ToString();
+					return publicKeyVerification == _publicKey;
+				}
 			} catch (Exception err)
 			{
 #if DEBUG_MODE_DISPLAY_LOG
@@ -710,10 +719,10 @@ namespace YourBitcoinController
 		/* 
 		* ValidateBitcoinAddress
 		*/
-		public static bool ValidateBitcoinAddress(string address)
+		public static bool ValidateBitcoinAddress(string _address)
 		{
-			if (address.Length < 26 || address.Length > 35) return false;
-			byte[] decoded = DecodeBase58(address);
+			if (_address.Length < 26 || _address.Length > 35) return false;
+			byte[] decoded = DecodeBase58(_address);
 			var d1 = Hash(decoded.SubArray(0, 21));
 			var d2 = Hash(d1);
 			if (!decoded.SubArray(21, 4).SequenceEqual(d2.SubArray(0, 4))) return false;
@@ -826,7 +835,7 @@ namespace YourBitcoinController
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("THERE ARE NO OPERATIONS FOR THIS ACCOUNT");
 #endif
-				if (_dispatchEvent) BasicEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_BALANCE_WALLET, 0.2f, 0f, true);
+				if (_dispatchEvent) BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_BALANCE_WALLET, 0.2f, 0f, true);
 				return null;
 			}
 			List<Coin> unspentCoins = new List<Coin>();
@@ -844,7 +853,7 @@ namespace YourBitcoinController
 				getTablesExchanges = true;
 			}
 			m_balanceWallet = balance;
-			if (_dispatchEvent) BasicEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_BALANCE_WALLET, 0.2f, (float)balance, getTablesExchanges);
+			if (_dispatchEvent) BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_BALANCE_WALLET, 0.2f, (float)balance, getTablesExchanges);
 			return unspentCoins;
 		}
 
@@ -999,7 +1008,7 @@ namespace YourBitcoinController
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("++ERROR++ CONSUMER HAS NO COINS");
 #endif
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "text.locations.you.have.no.coins");
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "text.locations.you.have.no.coins");
 				return false;
 			}
 
@@ -1031,7 +1040,7 @@ namespace YourBitcoinController
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("++ERROR++ THERE IS NO COIN TO SELECT");
 #endif
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "text.locations.you.have.no.coins");
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "text.locations.you.have.no.coins");
 				return;
 			}
 			Money txInAmount = _coinsToSpend[0].Amount;
@@ -1133,7 +1142,7 @@ namespace YourBitcoinController
 				Debug.Log("HEXADECIMAL");
 				Debug.Log(_customerTransaction.ToHex());
 #endif
-				BasicEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, 0.1f, true);
+				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, 0.1f, true);
 			}
 			else
 			{
@@ -1142,7 +1151,7 @@ namespace YourBitcoinController
 				Debug.Log("Error message: " + broadcastResponse.Error.Reason);
 #endif
 
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "Transaction failed to be broadcasted to the network");
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "Transaction failed to be broadcasted to the network");
 			}
 		}
 
@@ -1257,7 +1266,7 @@ namespace YourBitcoinController
 				balanceCurrencyTrimmed += " " + m_currentCurrency;
 				string transactionCurrencyTrimmed = Utilities.Trim((m_currenciesExchange[m_currentCurrency] * m_finalValueBitcoins).ToString());
 				transactionCurrencyTrimmed += " " + m_currentCurrency;
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "There is not enough balance to perform the transaction. Current balance="+ balanceCurrencyTrimmed + " and Transaction requires=" + transactionCurrencyTrimmed);
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, false, "There is not enough balance to perform the transaction. Current balance="+ balanceCurrencyTrimmed + " and Transaction requires=" + transactionCurrencyTrimmed);
 				return;
 			}
 
@@ -1341,17 +1350,17 @@ namespace YourBitcoinController
 				Debug.Log("MIN ESTIMATED FEE: " + m_feesTransactions[FEE_LABEL_MIN_ESTIMATED]);
 #endif
 
-				BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED);
+				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED);
 			}
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_TRANSACTION_DONE)
 			{
 				if (!(bool)_list[0])
 				{
-					BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, false, (string)_list[1]);
+					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, false, (string)_list[1]);
 				}
 				else
 				{
-					BasicEventController.Instance.DispatchBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, true);
+					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, true);
 
 					// UPDATE WALLET
 					AddPrivateKey(m_currentPrivateKey, false);

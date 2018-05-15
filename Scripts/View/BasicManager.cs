@@ -1,13 +1,5 @@
-using UnityEngine;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using NBitcoin;
-using QBitNinja.Client;
-using System.Text;
-using QBitNinja.Client.Models;
-using NBitcoin.Policy;
-using UnityEngine.Networking;
+using UnityEngine;
 
 namespace YourBitcoinController
 {
@@ -89,7 +81,7 @@ namespace YourBitcoinController
 		{
 			BitCoinController.Instance.Init(BitCoinController.OPTION_NETWORK_TEST);
 
-			BasicEventController.Instance.BasicEvent += new BasicEventHandler(OnBasicEvent);
+			BitcoinEventController.Instance.BitcoinEvent += new BitcoinEventHandler(OnBitcoinEvent);
 
 			for (int i = 0; i < PRIVATE_KEY_TOTAL.Length; i++)
 			{
@@ -113,7 +105,7 @@ namespace YourBitcoinController
 		*/
 		public void Destroy()
 		{
-			BasicEventController.Instance.BasicEvent -= OnBasicEvent;
+			BitcoinEventController.Instance.BitcoinEvent -= OnBitcoinEvent;
 		}
 
 		// -------------------------------------------
@@ -340,7 +332,7 @@ namespace YourBitcoinController
 		/* 
 		 * OnBasicEvent
 		 */
-		private void OnBasicEvent(string _nameEvent, params object[] _list)
+		private void OnBitcoinEvent(string _nameEvent, params object[] _list)
 		{
 			if (_nameEvent == BitCoinController.EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED)
 			{
