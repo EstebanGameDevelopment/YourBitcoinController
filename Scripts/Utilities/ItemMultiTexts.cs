@@ -8,7 +8,7 @@ using System.IO;
 namespace YourBitcoinController
 {
 
-	public class ItemMultiTextEntry
+	public class ItemMultiTexts
 	{
 		private List<string> m_items;
 
@@ -21,7 +21,7 @@ namespace YourBitcoinController
 		/* 
 		 * Constructor
 		 */
-		public ItemMultiTextEntry(params string[] _list)
+		public ItemMultiTexts(params string[] _list)
 		{
 			m_items = new List<string>();
 			for (int i = 0; i < _list.Length; i++)
@@ -37,9 +37,9 @@ namespace YourBitcoinController
 		/* 
 		 * Clone
 		 */
-		public ItemMultiTextEntry Clone()
+		public ItemMultiTexts Clone()
 		{
-			ItemMultiTextEntry output = new ItemMultiTextEntry(m_items.ToArray());
+			ItemMultiTexts output = new ItemMultiTexts(m_items.ToArray());
 			return output;
 		}
 
@@ -47,9 +47,9 @@ namespace YourBitcoinController
 		/* 
 		 * CloneList
 		 */
-		public static List<ItemMultiTextEntry> CloneList(List<ItemMultiTextEntry> _list)
+		public static List<ItemMultiTexts> CloneList(List<ItemMultiTexts> _list)
 		{
-			List<ItemMultiTextEntry> output = new List<ItemMultiTextEntry>();
+			List<ItemMultiTexts> output = new List<ItemMultiTexts>();
 			for (int i = 0; i < _list.Count; i++)
 			{
 				output.Add(_list[i].Clone());
@@ -85,7 +85,7 @@ namespace YourBitcoinController
 		/* 
 		 * EqualsEntry
 		 */
-		public bool EqualsEntry(ItemMultiTextEntry _item)
+		public bool EqualsEntry(ItemMultiTexts _item)
 		{
 			bool output = true;
 			for (int i = 0; i < m_items.Count; i++)

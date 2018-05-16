@@ -725,10 +725,10 @@ namespace YourBitcoinController
 		/* 
 		* ComputeHashCode
 		*/
-		public static string ComputeHashCode(byte[] _imgBytes)
+		public static string ComputeHashCode(byte[] _bytes)
 		{
 			SHA256Managed shaEncryptor = new SHA256Managed();
-			byte[] hash = shaEncryptor.ComputeHash(_imgBytes);
+			byte[] hash = shaEncryptor.ComputeHash(_bytes);
 			return Convert.ToBase64String(hash);
 		}
 	}

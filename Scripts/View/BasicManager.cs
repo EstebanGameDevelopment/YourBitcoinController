@@ -304,14 +304,14 @@ namespace YourBitcoinController
 			AddLog("++INPUT TRANSACTIONS[" + BitCoinController.Instance.InTransactionsHistory.Count + "]++");
 			for (int i = 0; i < BitCoinController.Instance.InTransactionsHistory.Count; i++)
 			{
-				ItemMultiObjectEntry transaction = BitCoinController.Instance.InTransactionsHistory[i];
+				ItemMultiObjects transaction = BitCoinController.Instance.InTransactionsHistory[i];
 				AddLog(BitCoinController.ToStringTransaction(transaction));
 			}
 
 			AddLog("--OUTPUT TRANSACTIONS[" + BitCoinController.Instance.OutTransactionsHistory.Count + "]--");
 			for (int i = 0; i < BitCoinController.Instance.OutTransactionsHistory.Count; i++)
 			{
-				ItemMultiObjectEntry transaction = BitCoinController.Instance.OutTransactionsHistory[i];
+				ItemMultiObjects transaction = BitCoinController.Instance.OutTransactionsHistory[i];
 				AddLog(BitCoinController.ToStringTransaction(transaction));
 			}
 		}

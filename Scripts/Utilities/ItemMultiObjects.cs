@@ -7,8 +7,7 @@ using System.IO;
 
 namespace YourBitcoinController
 {
-
-	public class ItemMultiObjectEntry
+	public class ItemMultiObjects
 	{
 		private List<object> m_objects;
 
@@ -21,7 +20,7 @@ namespace YourBitcoinController
 		/* 
 		 * Constructor
 		 */
-		public ItemMultiObjectEntry(params object[] _list)
+		public ItemMultiObjects(params object[] _list)
 		{
 			m_objects = new List<object>();
 			for (int i = 0; i < _list.Length; i++)
@@ -61,7 +60,7 @@ namespace YourBitcoinController
 		/* 
 		 * EqualsEntry
 		 */
-		public bool EqualsEntry(ItemMultiObjectEntry _item)
+		public bool EqualsEntry(ItemMultiObjects _item)
 		{
 			bool output = true;
 			for (int i = 0; i < m_objects.Count; i++)

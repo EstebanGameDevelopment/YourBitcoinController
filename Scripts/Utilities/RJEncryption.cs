@@ -10,11 +10,11 @@ namespace YourBitcoinController
 
 	/******************************************
 	 * 
-	 * RJEncryptor
+	 * RJEncryption
 	 * 
 	 * Encryption class that uses Rijndael algorithm
 	 */
-	public static class RJEncryptor
+	public static class RJEncryption
 	{
 		// -------------------------------------------
 		/* 
