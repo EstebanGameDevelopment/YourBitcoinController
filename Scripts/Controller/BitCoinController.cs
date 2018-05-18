@@ -50,6 +50,7 @@ namespace YourBitcoinController
 		public const string EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE		= "EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE";
 		public const string EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE			= "EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE";
 		public const string EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED		= "EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED";
+		public const string EVENT_BITCOINCONTROLLER_ALL_DATA_INITIALIZED	= "EVENT_BITCOINCONTROLLER_ALL_DATA_INITIALIZED";
 		public const string EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY	= "EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY";
 		public const string EVENT_BITCOINCONTROLLER_SELECTED_PUBLIC_KEY		= "EVENT_BITCOINCONTROLLER_SELECTED_PUBLIC_KEY";
 		public const string EVENT_BITCOINCONTROLLER_BALANCE_UPDATED			= "EVENT_BITCOINCONTROLLER_BALANCE_UPDATED";
@@ -282,7 +283,11 @@ namespace YourBitcoinController
 		 */
 		public void Init(params string[] _list)
 		{
-			if (m_initialized) return;
+			if (m_initialized)
+			{
+				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED, 0.1f);
+				return;
+			}
 			m_initialized = true;
 
 			System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
@@ -335,6 +340,27 @@ namespace YourBitcoinController
 			{
 				CurrentPrivateKey = m_backupCurrentPrivateKey;
 			}
+		}
+
+		// -------------------------------------------
+		/* 
+		* GetCurrentExchange
+		*/
+		public decimal GetCurrentExchange()
+		{
+			bool found = false;
+			for (int i = 0; i < CURRENCY_CODE.Length; i++)
+			{
+				if (m_currentCurrency == CURRENCY_CODE[i])
+				{
+					found = true;
+				}
+			}
+			if (!found)
+			{
+				m_currentCurrency = CODE_DOLLAR;
+			}
+			return m_currenciesExchange[m_currentCurrency];
 		}
 
 		// -------------------------------------------
@@ -1173,7 +1199,7 @@ namespace YourBitcoinController
 				Debug.Log("HEXADECIMAL");
 				Debug.Log(_customerTransaction.ToHex());
 #endif
-				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, 0.1f, true);
+				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_DONE, 0.1f, true, _customerTransaction.GetHash().ToString());
 			}
 			else
 			{
