@@ -1,4 +1,4 @@
-YOUR NETWORK TOOLS
+YOUR BITCOIN CONTROLLER
 ----------------
 Thanks for downloading this package.
 

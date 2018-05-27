@@ -7,6 +7,7 @@ using System.Xml;
 using System.IO;
 using System.Text;
 using UnityEngine.Networking;
+using YourCommonTools;
 
 namespace YourBitcoinController
 {

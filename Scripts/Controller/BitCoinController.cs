@@ -9,6 +9,7 @@ using QBitNinja.Client.Models;
 using UnityEngine.Networking;
 using System.Security.Cryptography;
 using UnityEngine.UI;
+using YourCommonTools;
 
 namespace YourBitcoinController
 {
@@ -57,6 +58,8 @@ namespace YourBitcoinController
 		public const string EVENT_BITCOINCONTROLLER_NEW_CURRENCY_SELECTED	= "EVENT_BITCOINCONTROLLER_NEW_CURRENCY_SELECTED";
 		public const string EVENT_BITCOINCONTROLLER_CURRENCY_CHANGED		= "EVENT_BITCOINCONTROLLER_CURRENCY_CHANGED";
 		public const string EVENT_BITCOINCONTROLLER_UPDATE_ACCOUNT_DATA		= "EVENT_BITCOINCONTROLLER_UPDATE_ACCOUNT_DATA";
+		public const string EVENT_BITCOINCONTROLLER_PUBLIC_KEY_SELECTED		= "EVENT_BITCOINCONTROLLER_PUBLIC_KEY_SELECTED";
+		public const string EVENT_BITCOINCONTROLLER_USER_DATA_UPDATED		= "EVENT_BITCOINCONTROLLER_USER_DATA_UPDATED";
 
 		public const string NETWORK_TEST = "TEST_";
 		public const string NETWORK_MAIN = "MAIN_";
@@ -152,9 +155,9 @@ namespace YourBitcoinController
 		private decimal m_balanceWallet = -1;
 		private float m_paymentsWallet = -1;
 
-		private List<ItemMultiObjects> m_allTransactionsHistory = new List<ItemMultiObjects>();
-		private List<ItemMultiObjects> m_inTransactionsHistory = new List<ItemMultiObjects>();
-		private List<ItemMultiObjects> m_outTransactionsHistory = new List<ItemMultiObjects>();
+		private List<ItemMultiObjectEntry> m_allTransactionsHistory = new List<ItemMultiObjectEntry>();
+		private List<ItemMultiObjectEntry> m_inTransactionsHistory = new List<ItemMultiObjectEntry>();
+		private List<ItemMultiObjectEntry> m_outTransactionsHistory = new List<ItemMultiObjectEntry>();
 
 		private Dictionary<string, decimal> m_walletBalanceCurrencies = new Dictionary<string, decimal>();
 		private Dictionary<string, decimal> m_currenciesExchange = new Dictionary<string, decimal>();
@@ -193,15 +196,15 @@ namespace YourBitcoinController
 		{
 			get { return m_walletBalanceCurrencies; }
 		}
-		public List<ItemMultiObjects> AllTransactionsHistory
+		public List<ItemMultiObjectEntry> AllTransactionsHistory
 		{
 			get { return m_allTransactionsHistory; }
 		}
-		public List<ItemMultiObjects> InTransactionsHistory
+		public List<ItemMultiObjectEntry> InTransactionsHistory
 		{
 			get { return m_inTransactionsHistory; }
 		}
-		public List<ItemMultiObjects> OutTransactionsHistory
+		public List<ItemMultiObjectEntry> OutTransactionsHistory
 		{
 			get { return m_outTransactionsHistory; }
 		}
@@ -244,7 +247,7 @@ namespace YourBitcoinController
 				if (m_currentPrivateKey.Length != 0)
 				{
 					m_currentPublicKey = GetPublicKey(m_currentPrivateKey);
-					PlayerPrefs.SetString(CodeNetwork + BITCOIN_PRIVATE_KEY_SELECTED, RJEncryption.EncryptStringWithKey(m_currentPrivateKey, ENCRYPTION_KEY));
+					PlayerPrefs.SetString(CodeNetwork + BITCOIN_PRIVATE_KEY_SELECTED, RJEncryptor.EncryptStringWithKey(m_currentPrivateKey, ENCRYPTION_KEY));
 					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_SELECTED_PRIVATE_KEY);
 				}
 			}
@@ -381,7 +384,7 @@ namespace YourBitcoinController
 			string encryptedAddresses = PlayerPrefs.GetString(CodeNetwork + BITCOIN_ADDRESSES_LIST, "");
 			if ((encryptedAddresses == null) || (encryptedAddresses == "")) return;
 
-			string dataAddresses = RJEncryption.DecryptStringWithKey(encryptedAddresses, ENCRYPTION_KEY);
+			string dataAddresses = RJEncryptor.DecryptStringWithKey(encryptedAddresses, ENCRYPTION_KEY);
 			m_addressesList.Clear();
 
 			string[] arrayAddresses = dataAddresses.Split(SEPARATOR_ITEMS);
@@ -429,7 +432,7 @@ namespace YourBitcoinController
 				}
 				dataAddresses += publicAddress.Key + SEPARATOR_COMA + publicAddress.Value;
 			}
-			PlayerPrefs.SetString(CodeNetwork + BITCOIN_ADDRESSES_LIST, RJEncryption.EncryptStringWithKey(dataAddresses, ENCRYPTION_KEY));
+			PlayerPrefs.SetString(CodeNetwork + BITCOIN_ADDRESSES_LIST, RJEncryptor.EncryptStringWithKey(dataAddresses, ENCRYPTION_KEY));
 		}
 
 		// -------------------------------------------
@@ -446,10 +449,10 @@ namespace YourBitcoinController
 		/* 
 		* GetListDataAddresses
 		*/
-		public List<ItemMultiObjects> GetListDataAddresses(bool _excludeOwnerAccounts, params string[] _excludeAddresses)
+		public List<ItemMultiObjectEntry> GetListDataAddresses(bool _excludeOwnerAccounts, params string[] _excludeAddresses)
 		{
 			LoadDataAddresses();
-			List<ItemMultiObjects> output = new List<ItemMultiObjects>();
+			List<ItemMultiObjectEntry> output = new List<ItemMultiObjectEntry>();
 			foreach (KeyValuePair<string, string> address in m_addressesList)
 			{
 				bool shouldBeIncluded = true;
@@ -469,7 +472,7 @@ namespace YourBitcoinController
 				}
 				if (shouldBeIncluded)
 				{
-					output.Add(new ItemMultiObjects(address.Key, address.Value));
+					output.Add(new ItemMultiObjectEntry(address.Key, address.Value));
 				}				
 			}
 			return output;
@@ -523,14 +526,14 @@ namespace YourBitcoinController
 			string currentPrivateKeySelected = PlayerPrefs.GetString(CodeNetwork + BITCOIN_PRIVATE_KEY_SELECTED, "");
 			if (currentPrivateKeySelected.Length > 0)
 			{
-				m_currentPrivateKey = RJEncryption.DecryptStringWithKey(currentPrivateKeySelected, ENCRYPTION_KEY);
+				m_currentPrivateKey = RJEncryptor.DecryptStringWithKey(currentPrivateKeySelected, ENCRYPTION_KEY);
 				m_currentPublicKey = GetPublicKey(m_currentPrivateKey);
 			}			
 
 			string encryptedKeys = PlayerPrefs.GetString(CodeNetwork + BITCOIN_PRIVATE_KEYS, "");
 			if ((encryptedKeys == null) || (encryptedKeys == "")) return;
 
-			string dataKeys = RJEncryption.DecryptStringWithKey(encryptedKeys, ENCRYPTION_KEY);
+			string dataKeys = RJEncryptor.DecryptStringWithKey(encryptedKeys, ENCRYPTION_KEY);
 			m_privateKeys.Clear();
 
 			string[] arrayKeys = dataKeys.Split(SEPARATOR_ITEMS);
@@ -588,7 +591,7 @@ namespace YourBitcoinController
 				}
 				dataKeys += privateKey.Key + SEPARATOR_COMA + privateKey.Value;
 			}
-			PlayerPrefs.SetString(CodeNetwork + BITCOIN_PRIVATE_KEYS, RJEncryption.EncryptStringWithKey(dataKeys, ENCRYPTION_KEY));
+			PlayerPrefs.SetString(CodeNetwork + BITCOIN_PRIVATE_KEYS, RJEncryptor.EncryptStringWithKey(dataKeys, ENCRYPTION_KEY));
 		}
 
 		// -------------------------------------------
@@ -656,9 +659,9 @@ namespace YourBitcoinController
 		/* 
 		* GetListPrivateKeys
 		*/
-		public List<ItemMultiObjects> GetListPrivateKeys(params string[] _excludePrivateKeys)
+		public List<ItemMultiObjectEntry> GetListPrivateKeys(params string[] _excludePrivateKeys)
 		{
-			SortedDictionary<string, ItemMultiObjects> orderedKeys = new SortedDictionary<string, ItemMultiObjects>();
+			SortedDictionary<string, ItemMultiObjectEntry> orderedKeys = new SortedDictionary<string, ItemMultiObjectEntry>();
 			foreach (KeyValuePair<string, decimal> privateKey in m_privateKeys)
 			{
 				bool includeKey = true;
@@ -674,12 +677,12 @@ namespace YourBitcoinController
 				}
 				if (includeKey)
 				{
-					orderedKeys.Add(AddressToLabel(m_publicKeys[privateKey.Key]), new ItemMultiObjects(privateKey.Key, privateKey.Value));
+					orderedKeys.Add(AddressToLabel(m_publicKeys[privateKey.Key]), new ItemMultiObjectEntry(privateKey.Key, privateKey.Value));
 				}
 			}
 
-			List<ItemMultiObjects> output = new List<ItemMultiObjects>();
-			foreach (KeyValuePair<string, ItemMultiObjects> itemPair in orderedKeys)
+			List<ItemMultiObjectEntry> output = new List<ItemMultiObjectEntry>();
+			foreach (KeyValuePair<string, ItemMultiObjectEntry> itemPair in orderedKeys)
 			{
 				output.Add(itemPair.Value);
 			}
@@ -893,9 +896,9 @@ namespace YourBitcoinController
 			QBitNinjaClient clientQBitNinja = new QBitNinjaClient(NetworkAPI, m_network);
 			var balanceModel = clientQBitNinja.GetBalance(_address).Result;
 
-			m_allTransactionsHistory = new List<ItemMultiObjects>();
-			m_inTransactionsHistory = new List<ItemMultiObjects>();
-			m_outTransactionsHistory = new List<ItemMultiObjects>();
+			m_allTransactionsHistory = new List<ItemMultiObjectEntry>();
+			m_inTransactionsHistory = new List<ItemMultiObjectEntry>();
+			m_outTransactionsHistory = new List<ItemMultiObjectEntry>();
 			List<Coin> unspentCoins = new List<Coin>();
 			foreach (var operation in balanceModel.Operations)
 			{
@@ -913,7 +916,7 @@ namespace YourBitcoinController
 				decimal transactionFee = transactionResponse.Transaction.GetFee(transactionResponse.SpentCoins.ToArray()).ToUnit(MoneyUnit.BTC);
 				if (transactionAmount < 0) transactionAmount += transactionFee;
 				var outputs = transactionResponse.Transaction.Outputs;
-				List<ItemMultiTexts> transactionsAddresses = new List<ItemMultiTexts>();
+				List<ItemMultiTextEntry> transactionsAddresses = new List<ItemMultiTextEntry>();
 				string transactionMessage = "";
 				foreach (TxOut output in outputs)
 				{
@@ -927,7 +930,7 @@ namespace YourBitcoinController
 						{
 							if (address != _address)
 							{
-								transactionsAddresses.Add(new ItemMultiTexts(amount.ToString(), address.ToString()));
+								transactionsAddresses.Add(new ItemMultiTextEntry(amount.ToString(), address.ToString()));
 							}
 						}
 					}
@@ -940,13 +943,13 @@ namespace YourBitcoinController
 
 				if (transactionAmount > 0)
 				{
-					m_inTransactionsHistory.Add(new ItemMultiObjects(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
+					m_inTransactionsHistory.Add(new ItemMultiObjectEntry(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
 				}
 				else
 				{
-					m_outTransactionsHistory.Add(new ItemMultiObjects(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
+					m_outTransactionsHistory.Add(new ItemMultiObjectEntry(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
 				}
-				m_allTransactionsHistory.Add(new ItemMultiObjects(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
+				m_allTransactionsHistory.Add(new ItemMultiObjectEntry(transactionID, transactionHeight, transactionDate, transactionAmount, transactionFee, transactionMessage, transactionsAddresses));
 			}
 		}
 
@@ -954,7 +957,7 @@ namespace YourBitcoinController
 		/* 
 		* ToStringTransaction
 		*/
-		public static string ToStringTransaction(ItemMultiObjects _transaction)
+		public static string ToStringTransaction(ItemMultiObjectEntry _transaction)
 		{
 			string transactionID = (string)_transaction.Objects[0];
 			int transactionHeight = (int)_transaction.Objects[1];
@@ -962,12 +965,12 @@ namespace YourBitcoinController
 			decimal transactionAmount = (decimal)_transaction.Objects[3];
 			decimal transactionFee = (decimal)_transaction.Objects[4];
 			string transactionMessage = (string)_transaction.Objects[5];
-			List<ItemMultiTexts> transactionScriptPubKey = (List<ItemMultiTexts>)_transaction.Objects[6];
+			List<ItemMultiTextEntry> transactionScriptPubKey = (List<ItemMultiTextEntry>)_transaction.Objects[6];
 
 			string addresses = "";
 			for (int i = 0; i < transactionScriptPubKey.Count; i++)
 			{
-				ItemMultiTexts item = transactionScriptPubKey[i];
+				ItemMultiTextEntry item = transactionScriptPubKey[i];
 				if (addresses.Length > 0)
 				{
 					addresses += "::";
