@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using NBitcoin;
 using UnityEngine.UI;
+using YourCommonTools;
 
 namespace YourBitcoinController
 {
