@@ -320,7 +320,7 @@ namespace YourBitcoinController
 
 			m_currentCurrency = PlayerPrefs.GetString(CodeNetwork + BITCOIN_DEFAULT_CURRENCY, CODE_DOLLAR);
 
-			CommController.Instance.GetBitcoinExchangeRatesTable();
+			CommsHTTPConstants.GetBitcoinExchangeRatesTable();
 		}
 
 		// -------------------------------------------
@@ -1368,7 +1368,7 @@ namespace YourBitcoinController
 #endif
 					}
 				}
-				CommController.Instance.GetBitcoinTransactionFee();
+				CommsHTTPConstants.GetBitcoinTransactionFee();
 			}
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE)
 			{
