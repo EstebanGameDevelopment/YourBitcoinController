@@ -60,6 +60,7 @@ namespace YourBitcoinController
 		public const string EVENT_BITCOINCONTROLLER_UPDATE_ACCOUNT_DATA		= "EVENT_BITCOINCONTROLLER_UPDATE_ACCOUNT_DATA";
 		public const string EVENT_BITCOINCONTROLLER_PUBLIC_KEY_SELECTED		= "EVENT_BITCOINCONTROLLER_PUBLIC_KEY_SELECTED";
 		public const string EVENT_BITCOINCONTROLLER_USER_DATA_UPDATED		= "EVENT_BITCOINCONTROLLER_USER_DATA_UPDATED";
+		public const string EVENT_BITCOINCONTROLLER_TRANSACTION_USER_ACKNOWLEDGE = "EVENT_BITCOINCONTROLLER_TRANSACTION_USER_ACKNOWLEDGE";
 
 		public const string NETWORK_TEST = "TEST_";
 		public const string NETWORK_MAIN = "MAIN_";
@@ -319,7 +320,7 @@ namespace YourBitcoinController
 
 			m_currentCurrency = PlayerPrefs.GetString(CodeNetwork + BITCOIN_DEFAULT_CURRENCY, CODE_DOLLAR);
 
-			CommController.Instance.GetBitcoinExchangeRatesTable();
+			CommsHTTPConstants.GetBitcoinExchangeRatesTable();
 		}
 
 		// -------------------------------------------
@@ -1367,7 +1368,7 @@ namespace YourBitcoinController
 #endif
 					}
 				}
-				CommController.Instance.GetBitcoinTransactionFee();
+				CommsHTTPConstants.GetBitcoinTransactionFee();
 			}
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE)
 			{
