@@ -159,7 +159,7 @@ namespace YourBitcoinController
 			GUI.Label(new Rect(new Vector2((int)(xPosSetParameters), yGlobalPosition), new Vector2(widthSetParameters, 2 * fontSize)), "EXCHANGE");
 			xPosSetParameters += widthSetParameters;
 			GUI.Label(new Rect(new Vector2((int)(xPosSetParameters), yGlobalPosition), new Vector2(widthSetParameters, 2 * fontSize)), m_exchangeValue.ToString());
-			xPosSetParameters += widthSetParameters/2;
+			xPosSetParameters += widthSetParameters / 2;
 			GUI.Label(new Rect(new Vector2((int)(xPosSetParameters), yGlobalPosition), new Vector2(1.5f * widthSetParameters, 2 * fontSize)), "HOUR FEE");
 			xPosSetParameters += 1.5f * widthSetParameters;
 			float hourFeeInCurrency = (float)(BitCoinController.Instance.FeesTransactions[BitCoinController.FEE_LABEL_HOUR] * (decimal)m_exchangeValue);
@@ -180,7 +180,7 @@ namespace YourBitcoinController
 				if (GUI.Button(new Rect(new Vector2((int)xPosLocalCheck, yGlobalPosition), new Vector2(widthButtonCheck, 2 * fontSize)), "BAL[" + l + "]=" + (m_balanceWallets[l] * (float)m_exchangeValue) + " " + m_currency))
 				{
 					m_activateTextArea = false;
-					m_balanceWallets[l] = (float)CheckBalanceOrigin(l);
+					CheckBalanceOrigin(l);
 				}
 				xPosLocalCheck += widthButtonCheck;
 			}
@@ -283,16 +283,31 @@ namespace YourBitcoinController
 			Debug.Log(_message);
 		}
 
+		private int m_indexPrivateKeyAddresToCheckBalance;
+
 		// -------------------------------------------
 		/* 
 		* CheckBalanceOrigin
 		*/
-		private decimal CheckBalanceOrigin(int _index)
+		private void CheckBalanceOrigin(int _index)
 		{
-			decimal balance = BitCoinController.Instance.GetBalance(PRIVATE_KEY_TOTAL[_index], false);
-			AddLog("++++CURRENT BALANCE[" + _index + "][" + balance + "][" + (m_exchangeValue * balance) + " " + m_currency + "]++++");
-			return balance;
+			m_indexPrivateKeyAddresToCheckBalance = _index;
+			AddLog("++GETTING THE BALANCE FOR THE ACCOUNT["+_index+"]. PLEASE WAIT...++");
+			Invoke("CheckBalanceOriginReal", 0.1f);
 		}
+
+		// -------------------------------------------
+		/* 
+		* CheckBalanceOrigin
+		*/
+		private void CheckBalanceOriginReal()
+		{
+			decimal balance = BitCoinController.Instance.GetBalance(PRIVATE_KEY_TOTAL[m_indexPrivateKeyAddresToCheckBalance], false);
+			m_balanceWallets[m_indexPrivateKeyAddresToCheckBalance] = (float)balance;
+			AddLog("++++CURRENT BALANCE[" + m_indexPrivateKeyAddresToCheckBalance + "][" + balance + "][" + (m_exchangeValue * balance) + " " + m_currency + "]++++");
+		}
+
+		private string m_publicKeyAddresToCheckHistory;
 
 		// -------------------------------------------
 		/* 
@@ -300,7 +315,18 @@ namespace YourBitcoinController
 		*/
 		private void GetAllTransactions(string _publicKeyAdress)
 		{
-			BitCoinController.Instance.GetAllInformation(_publicKeyAdress);
+			m_publicKeyAddresToCheckHistory = _publicKeyAdress;
+			AddLog("++GETTING ALL THE TRANSACTION HISTORY. PLEASE WAIT...++");
+			Invoke("GetAllTransactionsReal", 0.1f);
+		}
+
+		// -------------------------------------------
+		/* 
+		* GetAllTransactionsReal
+		*/
+		public void GetAllTransactionsReal()
+		{
+			BitCoinController.Instance.GetAllInformation(m_publicKeyAddresToCheckHistory);
 
 			AddLog("++INPUT TRANSACTIONS[" + BitCoinController.Instance.InTransactionsHistory.Count + "]++");
 			for (int i = 0; i < BitCoinController.Instance.InTransactionsHistory.Count; i++)
