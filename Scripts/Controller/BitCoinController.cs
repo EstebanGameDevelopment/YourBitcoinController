@@ -126,6 +126,7 @@ namespace YourBitcoinController
 						GameObject container = new GameObject();
 						container.name = "BitCoinController";
 						_instance = container.AddComponent(typeof(BitCoinController)) as BitCoinController;
+						DontDestroyOnLoad(_instance);
 					}
 				}
 				return _instance;
@@ -1417,11 +1418,11 @@ namespace YourBitcoinController
 			{
 				if (!(bool)_list[0])
 				{
-					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, false, (string)_list[1]);
+					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, false, (string)_list[1], m_finalValueBitcoins.ToString());
 				}
 				else
 				{
-					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, true);
+					BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_TRANSACTION_COMPLETED, true, (string)_list[1], m_publicKeyTarget, m_finalValueBitcoins.ToString());
 
 					// UPDATE WALLET
 					AddPrivateKey(m_currentPrivateKey, false);
