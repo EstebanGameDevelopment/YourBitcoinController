@@ -43,6 +43,7 @@ namespace YourBitcoinController
 #endif
 						container.name = finalSingletonName;
 						_instance = container.AddComponent(typeof(BitcoinEventController)) as BitcoinEventController;
+						DontDestroyOnLoad(_instance);
 					}
 				}
 				return _instance;
