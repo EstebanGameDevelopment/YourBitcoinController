@@ -109,10 +109,12 @@ namespace YourBitcoinController
 
 		public static readonly string[] OPTIONS_NETWORK = { OPTION_NETWORK_TEST, OPTION_NETWORK_MAIN };
 
-		// ----------------------------------------------
-		// SINGLETON
-		// ----------------------------------------------	
-		private static BitCoinController _instance;
+        public const int TOTAL_SIZE_PUBLIC_KEY_ADDRESS_BITCOIN = 34;
+
+        // ----------------------------------------------
+        // SINGLETON
+        // ----------------------------------------------	
+        private static BitCoinController _instance;
 
 		public static BitCoinController Instance
 		{
@@ -728,6 +730,7 @@ namespace YourBitcoinController
 		{
 			try
 			{
+                /*
 				if (m_isMainNetwork)
 				{
 					return ValidateBitcoinAddress(_publicKey);
@@ -738,7 +741,9 @@ namespace YourBitcoinController
 					string publicKeyVerification = btkAddress.ScriptPubKey.GetDestinationAddress(BitCoinController.Instance.Network).ToString();
 					return publicKeyVerification == _publicKey;
 				}
-			} catch (Exception err)
+                */
+                return (_publicKey.Length == BitCoinController.TOTAL_SIZE_PUBLIC_KEY_ADDRESS_BITCOIN);
+            } catch (Exception err)
 			{
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("ValidatePublicKey::ERROR[" + err.Message + "]==========" + err.StackTrace);
