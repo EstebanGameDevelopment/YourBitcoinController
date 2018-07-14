@@ -1,6 +1,8 @@
+-----------------------
+-----------------------
 YOUR BITCOIN CONTROLLER
-----------------
-Thanks for downloading this package.
+-----------------------
+-----------------------
 
 Thanks to this plugin you will be able to include Bitcoin cryptocurreny and Blockchain signning authentication
 in your games and applications.
