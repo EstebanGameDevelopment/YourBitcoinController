@@ -944,8 +944,15 @@ namespace YourBitcoinController
 					else
 					{						
 						byte[][] messageBytes = TxNullDataTemplate.Instance.ExtractScriptPubKeyParameters(output.ScriptPubKey);
-						transactionMessage = Encoding.UTF8.GetString(messageBytes[0]);
-					}
+                        transactionMessage = "Transaction";
+                        if (messageBytes != null)
+                        {
+                            if (messageBytes[0] != null)
+                            {
+                                transactionMessage = Encoding.UTF8.GetString(messageBytes[0]);
+                            }
+                        }
+                    }
 				}
 
 				if (transactionAmount > 0)
