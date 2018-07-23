@@ -129,7 +129,9 @@ namespace YourBitcoinController
 			float yGlobalPosition = 10;
 			float xPosSetParameters = 10;
 			float widthSetParameters = ((Screen.width - 20) / 4);
-			GUI.Label(new Rect(new Vector2(xPosSetParameters, yGlobalPosition), new Vector2(widthSetParameters, 2 * fontSize)), "NETWORK ++[" + BitCoinController.Instance.Network.ToString() + "]++");
+#if ENABLE_BITCOIN
+            GUI.Label(new Rect(new Vector2(xPosSetParameters, yGlobalPosition), new Vector2(widthSetParameters, 2 * fontSize)), "NETWORK ++[" + BitCoinController.Instance.Network.ToString() + "]++");
+#endif
 			xPosSetParameters += widthSetParameters;
 			if (GUI.Button(new Rect(new Vector2(xPosSetParameters, yGlobalPosition), new Vector2(3 * widthSetParameters, 2 * fontSize)), "Clear Log"))
 			{
@@ -328,6 +330,7 @@ namespace YourBitcoinController
 		{
 			BitCoinController.Instance.GetAllInformation(m_publicKeyAddresToCheckHistory);
 
+#if ENABLE_BITCOIN
 			AddLog("++INPUT TRANSACTIONS[" + BitCoinController.Instance.InTransactionsHistory.Count + "]++");
 			for (int i = 0; i < BitCoinController.Instance.InTransactionsHistory.Count; i++)
 			{
@@ -341,6 +344,7 @@ namespace YourBitcoinController
 				ItemMultiObjectEntry transaction = BitCoinController.Instance.OutTransactionsHistory[i];
 				AddLog(BitCoinController.ToStringTransaction(transaction));
 			}
+#endif
 		}
 
 		// -------------------------------------------
@@ -351,7 +355,9 @@ namespace YourBitcoinController
 		{
 			if (BitCoinController.Instance.ValidatePrivateKey(_privateKeyOrigin))
 			{
+#if ENABLE_BITCOIN
 				BitCoinController.Instance.Pay(_privateKeyOrigin, _publicKeyDestination, _titleOfTransfer, _amountToTransfer, _finalFeeAmount);
+#endif
 			}
 		}
 

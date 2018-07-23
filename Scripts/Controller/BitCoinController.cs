@@ -2,14 +2,16 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NBitcoin;
-using QBitNinja.Client;
 using System.Text;
-using QBitNinja.Client.Models;
 using UnityEngine.Networking;
 using System.Security.Cryptography;
 using UnityEngine.UI;
 using YourCommonTools;
+#if ENABLE_BITCOIN
+using NBitcoin;
+using QBitNinja.Client;
+using QBitNinja.Client.Models;
+#endif
 
 namespace YourBitcoinController
 {
@@ -109,10 +111,12 @@ namespace YourBitcoinController
 
 		public static readonly string[] OPTIONS_NETWORK = { OPTION_NETWORK_TEST, OPTION_NETWORK_MAIN };
 
-		// ----------------------------------------------
-		// SINGLETON
-		// ----------------------------------------------	
-		private static BitCoinController _instance;
+        public const int TOTAL_SIZE_PUBLIC_KEY_ADDRESS_BITCOIN = 34;
+
+        // ----------------------------------------------
+        // SINGLETON
+        // ----------------------------------------------	
+        private static BitCoinController _instance;
 
 		public static BitCoinController Instance
 		{
@@ -137,7 +141,9 @@ namespace YourBitcoinController
 		// PRIVATE MEMBERS
 		// ----------------------------------------------
 		private bool m_initialized = false;
+#if ENABLE_BITCOIN
 		private NBitcoin.Network m_network;
+#endif
 		private bool m_isMainNetwork = false;
 		private Dictionary<string,decimal> m_privateKeys = new Dictionary<string, decimal>();
 		private Dictionary<string, string> m_publicKeys = new Dictionary<string, string>();
@@ -176,10 +182,12 @@ namespace YourBitcoinController
 				PlayerPrefs.SetString(OPTION_NETWORK_COOKIE, (m_isMainNetwork?OPTION_NETWORK_MAIN:OPTION_NETWORK_TEST));
 			}
 		}
+#if ENABLE_BITCOIN
 		public NBitcoin.Network Network
 		{
 			get { return m_network; }
 		}
+#endif
 		public string NetworkAPI
 		{
 			get
@@ -290,7 +298,6 @@ namespace YourBitcoinController
 		{
 			if (m_initialized)
 			{
-				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED, 0.1f);
 				return;
 			}
 			m_initialized = true;
@@ -299,6 +306,7 @@ namespace YourBitcoinController
 			customCulture.NumberFormat.NumberDecimalSeparator = ".";
 			System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
+#if ENABLE_BITCOIN
 			QBitNinjaClient.SetCompression(false);
 #if DEBUG_MODE_DISPLAY_LOG
 			Debug.Log("BitCoinController Initialized");
@@ -317,21 +325,27 @@ namespace YourBitcoinController
 			{
 				m_network = NBitcoin.Network.TestNet;
 			}			
-			BitcoinEventController.Instance.BitcoinEvent += new BitcoinEventHandler(OnBasicEvent);
+			
+            BitcoinEventController.Instance.BitcoinEvent += new BitcoinEventHandler(OnBitcoinEvent);
+            BasicSystemEventController.Instance.BasicSystemEvent += new BasicSystemEventHandler(OnBasicSystemEvent);
 
 			m_currentCurrency = PlayerPrefs.GetString(CodeNetwork + BITCOIN_DEFAULT_CURRENCY, CODE_DOLLAR);
 
 			CommsHTTPConstants.GetBitcoinExchangeRatesTable();
-		}
+#endif
+        }
 
-		// -------------------------------------------
-		/* 
+        // -------------------------------------------
+        /* 
 		 * Destroy
 		 */
-		public void Destroy()
+        public void Destroy()
 		{
-			BitcoinEventController.Instance.BitcoinEvent -= OnBasicEvent;
-			Destroy(_instance.gameObject);
+#if ENABLE_BITCOIN
+			BitcoinEventController.Instance.BitcoinEvent -= OnBitcoinEvent;
+            BasicSystemEventController.Instance.BasicSystemEvent += OnBasicSystemEvent;
+#endif
+            Destroy(_instance.gameObject);
 			_instance = null;
 		}
 
@@ -698,6 +712,7 @@ namespace YourBitcoinController
 		 */
 		public bool ValidatePrivateKey(string _encryptedKey)
 		{
+#if ENABLE_BITCOIN
 			if (_encryptedKey == null) return false;
 			if (_encryptedKey == "") return false;
 			if (_encryptedKey == "null") return false;
@@ -717,6 +732,7 @@ namespace YourBitcoinController
 				Debug.Log("ValidatePrivateKey::ERROR[" + err.Message + "]==========" + err.StackTrace);
 #endif
 			}
+#endif
 			return false;
 		}
 
@@ -728,6 +744,7 @@ namespace YourBitcoinController
 		{
 			try
 			{
+                /*
 				if (m_isMainNetwork)
 				{
 					return ValidateBitcoinAddress(_publicKey);
@@ -738,7 +755,9 @@ namespace YourBitcoinController
 					string publicKeyVerification = btkAddress.ScriptPubKey.GetDestinationAddress(BitCoinController.Instance.Network).ToString();
 					return publicKeyVerification == _publicKey;
 				}
-			} catch (Exception err)
+                */
+                return (_publicKey.Length == BitCoinController.TOTAL_SIZE_PUBLIC_KEY_ADDRESS_BITCOIN);
+            } catch (Exception err)
 			{
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("ValidatePublicKey::ERROR[" + err.Message + "]==========" + err.StackTrace);
@@ -803,6 +822,7 @@ namespace YourBitcoinController
 		*/
 		public string GetPublicKey(string _dataKey)
 		{
+#if ENABLE_BITCOIN
 			try
 			{
 				BitcoinSecret bitcoinPrivateKey = new BitcoinSecret(_dataKey, m_network);
@@ -817,6 +837,7 @@ namespace YourBitcoinController
 				Debug.Log("ValidatePrivateKey::ERROR[" + err.Message + "]======" + err.StackTrace);
 #endif
 			}
+#endif
 			return "";
 		}
 
@@ -826,6 +847,8 @@ namespace YourBitcoinController
 		*/
 		public decimal GetBalance(string _privateKey, bool _dispatchEvent = false)
 		{
+#if ENABLE_BITCOIN
+
 #if DEBUG_MODE_DISPLAY_LOG
 			Debug.Log("GetBalance::TRYING TO GET BALANCE::m_network="+ m_network.ToString());
 #endif
@@ -838,8 +861,11 @@ namespace YourBitcoinController
 			else
 			{
 				return unspentCoins.Sum(x => x.Amount.ToDecimal(MoneyUnit.BTC));
-			}				
-		}
+			}		
+#else
+            return 0;
+#endif
+        }
 
 		// -------------------------------------------
 		/* 
@@ -850,14 +876,18 @@ namespace YourBitcoinController
 #if DEBUG_MODE_DISPLAY_LOG
 			Debug.Log("GetBalance::TRYING TO GET BALANCE");
 #endif
+#if ENABLE_BITCOIN
 			BitcoinAddress address = BitcoinAddress.Create(_publicKeyAdress, m_network);
 			GetSummaryAccount(address);
+#endif
 		}
 
-		// -------------------------------------------
-		/* 
+
+        // -------------------------------------------
+        /* 
 		* GetUnspentCoins
 		*/
+#if ENABLE_BITCOIN
 		public List<Coin> GetUnspentCoins(BitcoinAddress _address, bool _dispatchEvent)
 		{
 			QBitNinjaClient clientQBitNinja = new QBitNinjaClient(NetworkAPI, m_network);
@@ -939,8 +969,15 @@ namespace YourBitcoinController
 					else
 					{						
 						byte[][] messageBytes = TxNullDataTemplate.Instance.ExtractScriptPubKeyParameters(output.ScriptPubKey);
-						transactionMessage = Encoding.UTF8.GetString(messageBytes[0]);
-					}
+                        transactionMessage = "Transaction";
+                        if (messageBytes != null)
+                        {
+                            if (messageBytes[0] != null)
+                            {
+                                transactionMessage = Encoding.UTF8.GetString(messageBytes[0]);
+                            }
+                        }
+                    }
 				}
 
 				if (transactionAmount > 0)
@@ -955,11 +992,11 @@ namespace YourBitcoinController
 			}
 		}
 
-		// -------------------------------------------
-		/* 
+        // -------------------------------------------
+        /* 
 		* ToStringTransaction
 		*/
-		public static string ToStringTransaction(ItemMultiObjectEntry _transaction)
+        public static string ToStringTransaction(ItemMultiObjectEntry _transaction)
 		{
 			string transactionID = (string)_transaction.Objects[0];
 			int transactionHeight = (int)_transaction.Objects[1];
@@ -1336,12 +1373,49 @@ namespace YourBitcoinController
 			PaymentModel paymentForProvider = new PaymentModel(m_publicKeyTarget, m_network, m_finalValueBitcoins);
 			ExecuteTransaction(m_titleTransaction, _finalFeeAmount, paymentForProvider);
 		}
+#endif
 
-		// -------------------------------------------
-		/* 
-		* Manager of global events
+        // -------------------------------------------
+        /* 
+		* OnBasicSystemEvent
 		*/
-		private void OnBasicEvent(string _nameEvent, params object[] _list)
+        private void OnBasicSystemEvent(string _nameEvent, object[] _list)
+        {
+#if ENABLE_BITCOIN
+            if (_nameEvent == BasicSystemEventController.EVENT_BASICSYSTEMEVENT_REQUEST_SIGN_TEXT_DATA)
+            {
+                string signedText = SignTextData((string)_list[0], (string)_list[1]);
+                object[] result = new object[_list.Length - 1];
+                result[0] = signedText;
+                int counter = 1;
+                for (int i = 2; i < _list.Length; i++)
+                {
+                    result[counter] = _list[i];
+                    counter++;
+                }
+                BasicSystemEventController.Instance.DispatchBasicSystemEvent(BasicSystemEventController.EVENT_BASICSYSTEMEVENT_RESPONSE_SIGNED_TEXT_DATA, result);
+            }
+            if (_nameEvent == BasicSystemEventController.EVENT_BASICSYSTEMEVENT_REQUEST_VERIFY_TEXT_DATA)
+            {
+                bool dataVerification = VerifySignedData((string)_list[0], (string)_list[1], (string)_list[2]);
+                object[] result = new object[_list.Length - 1];
+                result[0] = dataVerification;
+                int counter = 1;
+                for (int i = 3; i < _list.Length; i++)
+                {
+                    result[counter] = _list[i];
+                    counter++;
+                }
+                BasicSystemEventController.Instance.DispatchBasicSystemEvent(BasicSystemEventController.EVENT_BASICSYSTEMEVENT_RESPONSE_VERIFICATION_TEXT_DATA, result);
+            }
+#endif
+        }
+
+        // -------------------------------------------
+        /* 
+		* Manager of bitcoin events
+		*/
+        private void OnBitcoinEvent(string _nameEvent, params object[] _list)
 		{
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE)
 			{
@@ -1381,24 +1455,30 @@ namespace YourBitcoinController
 				m_feesTransactions.Clear();
 				if (int.TryParse(jsonFee[FEE_FASTEST], out finalFeeAmount))
 				{
+#if ENABLE_BITCOIN
 					decimal fastFeeAmount = (((decimal)finalFeeAmount / (decimal)MoneyUnit.BTC) * (decimal)BitCoinController.ESTIMATED_SIZE_BLOCK);					
 					m_feesTransactions.Add(FEE_LABEL_FASTEST, fastFeeAmount);
+#endif
 #if DEBUG_MODE_DISPLAY_LOG
 					Debug.Log("FASTEST FEE: " + m_feesTransactions[FEE_LABEL_FASTEST]);
 #endif
-				}
-				if (int.TryParse(jsonFee[FEE_HALFHOUR], out finalFeeAmount))
+                }
+                if (int.TryParse(jsonFee[FEE_HALFHOUR], out finalFeeAmount))
 				{
+#if ENABLE_BITCOIN
 					decimal halfHourFeeAmount = (((decimal)finalFeeAmount / (decimal)MoneyUnit.BTC) * (decimal)BitCoinController.ESTIMATED_SIZE_BLOCK);
 					m_feesTransactions.Add(FEE_LABEL_HALFHOUR, halfHourFeeAmount);
+#endif
 #if DEBUG_MODE_DISPLAY_LOG
 					Debug.Log("HALFHOUR FEE: " + m_feesTransactions[FEE_LABEL_HALFHOUR]);
 #endif
 				}
 				if (int.TryParse(jsonFee[FEE_HOUR], out finalFeeAmount))
 				{
+#if ENABLE_BITCOIN
 					decimal hourFeeAmount = (((decimal)finalFeeAmount / (decimal)MoneyUnit.BTC) * (decimal)BitCoinController.ESTIMATED_SIZE_BLOCK);
 					m_feesTransactions.Add(FEE_LABEL_HOUR, hourFeeAmount);
+#endif
 #if DEBUG_MODE_DISPLAY_LOG
 					Debug.Log("HOUR FEE: " + m_feesTransactions[FEE_LABEL_HOUR]);
 #endif
