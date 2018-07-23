@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+#if ENABLE_BITCOIN
 using NBitcoin;
+#endif
 
 namespace YourBitcoinController
 {
@@ -81,7 +83,9 @@ namespace YourBitcoinController
 				}
 				else
 				{
+#if ENABLE_BITCOIN
 					AddLog("DATA SIGNED=" + BitCoinController.Instance.SignTextData(m_textData, PRIVATE_ROOT_KEY));
+#endif
 				}
 			}
 			yGlobalPosition += 2.2f * fontSize;
@@ -103,7 +107,9 @@ namespace YourBitcoinController
 				}
 				else
 				{
+#if ENABLE_BITCOIN
 					AddLog("IS DATA SIGNED BY ME? " + BitCoinController.Instance.VerifySignedData(m_textData, m_textSigned, PUBLICK_ROOT_KEY));
+#endif
 				}
 			}
 			yGlobalPosition += 2.2f * fontSize;
