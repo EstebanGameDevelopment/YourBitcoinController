@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
-using NBitcoin;
 using UnityEngine.UI;
 using YourCommonTools;
+#if ENABLE_BITCOIN
+using NBitcoin;
+#endif
 
 namespace YourBitcoinController
 {
@@ -72,7 +74,9 @@ namespace YourBitcoinController
 			if (GUI.Button(new Rect(new Vector2(10, yGlobalPosition), new Vector2((Screen.width - 20) / 2, 4 * fontSize)), "++SIGN IMAGE[" + m_originImageToSign + "] HASH++"))
 			{
 				string hashSpriteOrigin = Utilities.ComputeHashCode(Utilities.GetBytesPNG(MyImages[m_originImageToSign]));
+#if ENABLE_BITCOIN
 				AddLog("IMAGE SIGNED=" + BitCoinController.Instance.SignTextData(hashSpriteOrigin, PRIVATE_ROOT_KEY));
+#endif
 			}
 			string originImageToSign = GUI.TextField(new Rect(new Vector2(10 + ((Screen.width - 20) / 2), yGlobalPosition), new Vector2(2 * fontSize, 2 * fontSize)), m_originImageToSign.ToString());
 			if (!int.TryParse(originImageToSign, out m_originImageToSign))
@@ -101,7 +105,9 @@ namespace YourBitcoinController
 				else
 				{
 					string hashSpriteTarget = Utilities.ComputeHashCode(Utilities.GetBytesPNG(MyImages[m_targetImageToTest]));
+#if ENABLE_BITCOIN
 					AddLog("IS IMAGE SIGNED BY ME? " + BitCoinController.Instance.VerifySignedData(hashSpriteTarget, m_textSigned, PUBLICK_ROOT_KEY));
+#endif
 				}
 			}
 			string targetImageToSign = GUI.TextField(new Rect(new Vector2(10 + ((Screen.width - 20) / 2), yGlobalPosition), new Vector2(2 * fontSize, 2 * fontSize)), m_targetImageToTest.ToString());

@@ -1,4 +1,5 @@
-﻿using NBitcoin;
+﻿#if ENABLE_BITCOIN
+using NBitcoin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,3 +50,4 @@ namespace YourBitcoinController
 		}
 	}
 }
+#endif

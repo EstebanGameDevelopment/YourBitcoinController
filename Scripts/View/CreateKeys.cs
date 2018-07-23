@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+#if ENABLE_BITCOIN
 using NBitcoin;
+#endif
 
 namespace YourBitcoinController
 {
@@ -65,6 +67,7 @@ namespace YourBitcoinController
 			// GENERATE NEW KEY
 			if (GUI.Button(new Rect(new Vector2(10, yGlobalPosition), new Vector2(Screen.width - 20, 2 * fontSize)), "Create free new address on ++" + (BitCoinController.Instance.IsMainNetwork ? "Main" : "TestNet") + "++ Network"))
 			{
+#if ENABLE_BITCOIN
 				Key newKey = new Key();
 
 				AddLog("+++GENERATING KEY FOR NETWORK[" + BitCoinController.Instance.Network.ToString() + "]+++");
@@ -75,6 +78,7 @@ namespace YourBitcoinController
 				AddLog("" + mainNetKey);
 				AddLog("PUBLIC KEY:");
 				AddLog("" + mainNetKey.GetAddress());
+#endif
 			}
 			yGlobalPosition += 2.2f * fontSize;
 
