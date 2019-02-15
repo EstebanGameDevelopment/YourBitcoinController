@@ -806,21 +806,34 @@ namespace YourBitcoinController
 			return output;
 		}
 
-		// -------------------------------------------
-		/* 
+        // -------------------------------------------
+        /* 
 		* Hash
 		*/
-		private static byte[] Hash(byte[] _bytes)
+        public static byte[] Hash(byte[] _bytes)
 		{
 			var hasher = new SHA256Managed();
 			return hasher.ComputeHash(_bytes);
 		}
 
-		// -------------------------------------------
-		/* 
+        // -------------------------------------------
+        /* 
+		* Hash
+		*/
+        public static string Hash(string _message)
+        {
+            var hasher = new SHA256Managed();
+            byte[] data = Encoding.UTF8.GetBytes(_message);
+            byte[] result = hasher.ComputeHash(data);
+            return Convert.ToBase64String(result);
+        }
+
+
+        // -------------------------------------------
+        /* 
 		* GetPublicKey
 		*/
-		public string GetPublicKey(string _dataKey)
+        public string GetPublicKey(string _dataKey)
 		{
 #if ENABLE_BITCOIN
 			try
