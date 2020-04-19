@@ -842,7 +842,7 @@ namespace YourBitcoinController
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("GetPublicKey::bitcoinPrivateKey.GetAddress()=" + bitcoinPrivateKey.GetAddress());
 #endif
-				return bitcoinPrivateKey.GetAddress().ToString();
+				return bitcoinPrivateKey.GetAddress(ScriptPubKeyType.Legacy).ToString();
 			}
 			catch (Exception err)
 			{
@@ -866,7 +866,7 @@ namespace YourBitcoinController
 			Debug.Log("GetBalance::TRYING TO GET BALANCE::m_network="+ m_network.ToString());
 #endif
 			BitcoinSecret bitcoinUserPrivateKey = new BitcoinSecret(_privateKey, m_network);
-			List<Coin> unspentCoins = GetUnspentCoins(bitcoinUserPrivateKey.GetAddress(), _dispatchEvent);
+			List<Coin> unspentCoins = GetUnspentCoins(bitcoinUserPrivateKey.GetAddress(ScriptPubKeyType.Legacy), _dispatchEvent);
 			if (unspentCoins == null)
 			{
 				return 0;
@@ -1170,7 +1170,7 @@ namespace YourBitcoinController
 			TxOut originTxOut = new TxOut()
 			{
 				Value = changeBackAmount,
-				ScriptPubKey = _customerPrivateKey.ScriptPubKey
+				ScriptPubKey = _customerPrivateKey.GetAddress(ScriptPubKeyType.Legacy).ScriptPubKey
 			};
 			_transactionCustomer.Outputs.Add(originTxOut);
 		}
@@ -1197,14 +1197,19 @@ namespace YourBitcoinController
 		/* 
 		* SignTransaction
 		*/
-		private void SignTransaction(Transaction _transactionCustomer, BitcoinSecret _customerPrivateKey)
+		private void SignTransaction(Transaction _transactionCustomer, BitcoinSecret _customerPrivateKey, List<Coin> _coinToSpend)
 		{
 			for (int i = 0; i < _transactionCustomer.Inputs.Count; i++)
 			{
-				_transactionCustomer.Inputs[i].ScriptSig = _customerPrivateKey.ScriptPubKey;
-			}
-			_transactionCustomer.Sign(_customerPrivateKey, false);
-		}
+                _transactionCustomer.Inputs[i].ScriptSig = _customerPrivateKey.GetAddress(ScriptPubKeyType.Legacy).ScriptPubKey;
+            }
+            ICoin[] usedCoins = new ICoin[_coinToSpend.Count];
+            for (int i = 0; i < _coinToSpend.Count; i++)
+            {
+                usedCoins[i] = _coinToSpend[i];
+            }
+            _transactionCustomer.Sign(_customerPrivateKey, usedCoins);
+        }
 
 		// -------------------------------------------
 		/* 
@@ -1232,7 +1237,7 @@ namespace YourBitcoinController
 		*/
 		public bool VerifySignedData(string _dataOriginal, string _dataSigned, string _publicKey)
 		{
-			BitcoinPubKeyAddress address = new BitcoinPubKeyAddress(_publicKey);			
+			BitcoinPubKeyAddress address = new BitcoinPubKeyAddress(_publicKey, m_network);			
 			return address.VerifyMessage(_dataOriginal, _dataSigned);			
 		}
 
@@ -1322,16 +1327,16 @@ namespace YourBitcoinController
 
 			// CUSTOMER PRIVATE KEY
 			var customerPrivateKey = new BitcoinSecret(m_currentPrivateKey);
-			List<Coin> coinsInCustomerWallet = GetUnspentCoins(customerPrivateKey.GetAddress(), false);
+			List<Coin> coinsInCustomerWallet = GetUnspentCoins(customerPrivateKey.GetAddress(ScriptPubKeyType.Legacy), false);
 
 			// GET THE COINS WE HAVE TO SPEND FROM THE CUSTOMER WALLET
-			List<Coin> coinsToSpendInVideo = GetTransactionInputCoins(customerPrivateKey.GetAddress(), coinsInCustomerWallet, totalAmountToPay);
+			List<Coin> coinsToSpendInVideo = GetTransactionInputCoins(customerPrivateKey.GetAddress(ScriptPubKeyType.Legacy), coinsInCustomerWallet, totalAmountToPay);
 
 			// TRANSACTION
-			Transaction customerTransaction = new Transaction();
+            Transaction customerTransaction = Transaction.Create(m_network);
 
-			// ADD INPUTS
-			AddInputs(customerTransaction, customerPrivateKey, coinsToSpendInVideo, totalAmountToPay);
+            // ADD INPUTS
+            AddInputs(customerTransaction, customerPrivateKey, coinsToSpendInVideo, totalAmountToPay);
 
 			// ADD OUTPUTS
 			AddOutputs(customerTransaction, customerPrivateKey, _finalFeeAmount, _payments, totalAmountToPay, coinsToSpendInVideo);
@@ -1339,8 +1344,8 @@ namespace YourBitcoinController
 			// ADD MESSAGE
 			AddOutputMessage(customerTransaction, _title);
 
-			// SIGN MESSAGE
-			SignTransaction(customerTransaction, customerPrivateKey);
+            // SIGN MESSAGE
+            SignTransaction(customerTransaction, customerPrivateKey, coinsToSpendInVideo);
 
 			// BROADCAST TRANSACTION
 			BroadcastTransaction(clientQBitNinja, customerTransaction);
@@ -1505,7 +1510,7 @@ namespace YourBitcoinController
 				Debug.Log("MIN ESTIMATED FEE: " + m_feesTransactions[FEE_LABEL_MIN_ESTIMATED]);
 #endif
 
-				BitcoinEventController.Instance.DispatchBitcoinEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED);
+				BitcoinEventController.Instance.DelayBasicEvent(EVENT_BITCOINCONTROLLER_ALL_DATA_COLLECTED, 0.1f);
 			}
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_TRANSACTION_DONE)
 			{

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using YourCommonTools;
 
 namespace YourBitcoinController
@@ -25,7 +26,11 @@ namespace YourBitcoinController
 
 		public string Build(params object[] _list)
 		{
-			string phpFile = "^https://bitcoinfees.earn.com/api/v1/fees/recommended^";
+#if DEBUG_MODE_DISPLAY_LOG
+            Debug.LogError("BitcoinJSONFeeHTTP::Build::REQUESTING FEES++");
+#endif
+
+            string phpFile = "^https://bitcoinfees.earn.com/api/v1/fees/recommended^";
 #if !ENABLE_MY_OFUSCATION || UNITY_EDITOR
 			phpFile = phpFile.Replace("^", "");
 #endif
@@ -38,7 +43,11 @@ namespace YourBitcoinController
 		{
 			ResponseCode(_response);
 
-			BitcoinEventController.Instance.DispatchBitcoinEvent(BitCoinController.EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE, m_jsonResponse);
+#if DEBUG_MODE_DISPLAY_LOG
+            Debug.LogError("BitcoinJSONFeeHTTP::Response::RETRIEVED FEES--");
+#endif
+
+            BitcoinEventController.Instance.DelayBasicEvent(BitCoinController.EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE, 0.1f, m_jsonResponse);
 		}
 	}
 }
