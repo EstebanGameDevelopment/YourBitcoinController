@@ -1437,32 +1437,35 @@ namespace YourBitcoinController
 		{
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_JSON_EXCHANGE_TABLE)
 			{
-				m_walletBalanceCurrencies.Clear();
-				m_currenciesExchange.Clear();
-				JSONNode jsonExchangeTable = JSON.Parse((string)_list[0]);
+                if (m_currenciesExchange.Count == 0)
+                {
+                    m_walletBalanceCurrencies.Clear();
+                    m_currenciesExchange.Clear();
+                    JSONNode jsonExchangeTable = JSON.Parse((string)_list[0]);
 #if DEBUG_MODE_DISPLAY_LOG
 				Debug.Log("BITCOINS IN WALLET[" + m_balanceWallet + "]");
 #endif
-				for (int i = 0; i < CURRENCY_CODE.Length; i++)
-				{
-					string currencyCode = CURRENCY_CODE[i];
-					if (currencyCode == CODE_BITCOIN)
-					{
-						m_walletBalanceCurrencies.Add(currencyCode, m_balanceWallet * 1);
-						m_currenciesExchange.Add(currencyCode, 1);
-					}
-					else
-					{
-						decimal exchangeValue = decimal.Parse(jsonExchangeTable[currencyCode]["sell"]);
-						m_walletBalanceCurrencies.Add(currencyCode, m_balanceWallet * exchangeValue);
-						m_currenciesExchange.Add(currencyCode, exchangeValue);
+                    for (int i = 0; i < CURRENCY_CODE.Length; i++)
+                    {
+                        string currencyCode = CURRENCY_CODE[i];
+                        if (currencyCode == CODE_BITCOIN)
+                        {
+                            m_walletBalanceCurrencies.Add(currencyCode, m_balanceWallet * 1);
+                            m_currenciesExchange.Add(currencyCode, 1);
+                        }
+                        else
+                        {
+                            decimal exchangeValue = decimal.Parse(jsonExchangeTable[currencyCode]["sell"]);
+                            m_walletBalanceCurrencies.Add(currencyCode, m_balanceWallet * exchangeValue);
+                            m_currenciesExchange.Add(currencyCode, exchangeValue);
 #if DEBUG_MODE_DISPLAY_LOG
 						Debug.Log("BALANCE IN[" + currencyCode + "] IS[" + (m_balanceWallet * exchangeValue) + "]");
 #endif
-					}
-				}
-				CommsHTTPConstants.GetBitcoinTransactionFee();
-			}
+                        }
+                    }
+                    CommsHTTPConstants.GetBitcoinTransactionFee();
+                }
+            }
 			if (_nameEvent == EVENT_BITCOINCONTROLLER_JSON_FEE_TABLE)
 			{
 #if DEBUG_MODE_DISPLAY_LOG
