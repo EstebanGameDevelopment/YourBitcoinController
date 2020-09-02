@@ -111,6 +111,7 @@ namespace YourBitcoinController
 
 		public static readonly string[] OPTIONS_NETWORK = { OPTION_NETWORK_TEST, OPTION_NETWORK_MAIN };
 
+        public const int TOTAL_SIZE_PRIVATE_KEY_ADDRESS_BITCOIN = 52;
         public const int TOTAL_SIZE_PUBLIC_KEY_ADDRESS_BITCOIN = 34;
 
         // ----------------------------------------------
